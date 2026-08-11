@@ -15,5 +15,5 @@ jobs:
       - uses: supabase/setup-cli@v3
         with:
           version: latest
-      - run: supabase start
-      - run: supabase db reset
+      - run: supabase start --workdir backend/database
+      - run: supabase db reset --workdir backend/database

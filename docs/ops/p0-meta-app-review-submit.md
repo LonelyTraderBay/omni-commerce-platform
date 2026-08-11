@@ -23,7 +23,7 @@
 
 ## Permissions (Phase 1 — from code)
 
-Request **Advanced Access** for each scope in `apps/api/src/modules/channels/channels.service.ts`:
+Request **Advanced Access** for each scope in `backend/apps/api/src/modules/channels/channels.service.ts`:
 
 - `pages_show_list`
 - `pages_messaging`

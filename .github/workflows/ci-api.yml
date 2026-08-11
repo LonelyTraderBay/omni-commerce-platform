@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Local Supabase demo JWT pair (public; same as `supabase start` defaults).
-      # Needed since some apps/api/src/**/*.integration.spec.ts files connect to
+      # Needed since some backend/apps/api/src/**/*.integration.spec.ts files connect to
       # a real local Postgres (e.g. the multi-warehouse stock-total regression
       # tests) rather than a mocked Supabase client.
       SUPABASE_URL: http://127.0.0.1:54721
@@ -23,8 +23,8 @@ jobs:
       - uses: supabase/setup-cli@v3
         with:
           version: latest
-      - run: supabase start
-      - run: supabase db reset
+      - run: supabase start --workdir backend/database
+      - run: supabase db reset --workdir backend/database
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.0

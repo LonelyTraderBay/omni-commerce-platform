@@ -7,14 +7,14 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:isolation": "pnpm --filter @omni/authz-types build && pnpm --dir apps/api exec vitest run --root ../../tests/isolation cross-tenant",
-    "test:eval": "uv run --directory apps/ai python ../../tests/eval/run_stub.py",
-    "test:e2e:local": "node scripts/local-e2e-smoke.mjs",
-    "ports:sync": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-local-env-ports.ps1",
+    "test:isolation": "pnpm --filter @omni/authz-types build && pnpm --dir backend/apps/api exec vitest run --root ../../tests/isolation cross-tenant",
+    "test:eval": "uv run --directory backend/apps/ai python ../../tests/eval/run_stub.py",
+    "test:e2e:local": "node infra/scripts/local-e2e-smoke.mjs",
+    "ports:sync": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/sync-local-env-ports.ps1",
     "dev": "turbo run dev --parallel",
-    "dev:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-local.ps1",
-    "dev:local:fresh": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-local.ps1 -FreshWeb",
-    "dev:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-local.ps1 -Stop"
+    "dev:local": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/dev-local.ps1",
+    "dev:local:fresh": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/dev-local.ps1 -FreshWeb",
+    "dev:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/dev-local.ps1 -Stop"
   },
   "devDependencies": {
     "turbo": "^2.3.3",

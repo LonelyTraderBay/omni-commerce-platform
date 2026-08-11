@@ -12,9 +12,9 @@ The platform needs one default hosting vendor for the web app, core API, and AI 
 
 Render is the single approved hosting vendor for:
 
-- `apps/web`
-- `apps/api`
-- `apps/ai`
+- `frontend/apps/web`
+- `backend/apps/api`
+- `backend/apps/ai`
 
 Render may be used on free or paid plans. Production, staging, preview, and smoke-test documentation should assume Render unless a later ADR replaces this decision.
 

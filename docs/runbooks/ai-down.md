@@ -4,12 +4,12 @@
 
 - API gọi `AI_BASE_URL` bị timeout, trả lỗi 5xx, hoặc `/health` của AI không trả `{"status":"ok"}`.
 - Tính năng tạo nháp, gợi ý trả lời, hoặc phân tích hội thoại bị treo.
-- Log API có lỗi từ `ai-proxy` hoặc kết nối tới `apps/ai`.
+- Log API có lỗi từ `ai-proxy` hoặc kết nối tới `backend/apps/ai`.
 
 ## Kiểm tra
 
 1. Gọi health check: `GET /health` trên AI service.
-2. Kiểm tra Render service của `apps/ai`: trạng thái deploy, restart loop, CPU/RAM, log gần nhất.
+2. Kiểm tra Render service của `backend/apps/ai`: trạng thái deploy, restart loop, CPU/RAM, log gần nhất.
 3. Kiểm tra biến môi trường AI: `SERVICE_M2M_KEY`, `CORE_BASE_URL`, `AI_MODEL_ALLOWLIST`, provider key.
 4. Kiểm tra API có trỏ đúng `AI_BASE_URL` và không bị chặn mạng nội bộ.
 

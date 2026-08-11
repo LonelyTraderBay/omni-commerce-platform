@@ -4,9 +4,9 @@
 
 | App | Render service | Live URL | Supabase |
 |-----|----------------|----------|----------|
-| `apps/api` | `omni-api-staging` | https://omni-api-staging-cs2w.onrender.com | `tjsmpcgkeoglemptuymu` |
-| `apps/ai` | `omni-ai-staging` | https://omni-ai-staging.onrender.com | — |
-| `apps/web` | `omni-web-staging` | https://omni-web-staging.onrender.com | same staging project |
+| `backend/apps/api` | `omni-api-staging` | https://omni-api-staging-cs2w.onrender.com | `tjsmpcgkeoglemptuymu` |
+| `backend/apps/ai` | `omni-ai-staging` | https://omni-ai-staging.onrender.com | — |
+| `frontend/apps/web` | `omni-web-staging` | https://omni-web-staging.onrender.com | same staging project |
 
 Blueprint file: [`render.yaml`](../../render.yaml) (currently **free** plan — sleeps; upgrade to **starter** when payment added).
 

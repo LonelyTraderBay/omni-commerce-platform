@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - 'supabase/migrations/**'
+      - 'backend/database/supabase/migrations/**'
       - '.github/workflows/staging-migrate.yml'
 
 jobs:
@@ -40,5 +40,5 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           STAGING_PROJECT_REF: ${{ secrets.STAGING_PROJECT_REF }}
         run: |
-          supabase link --project-ref "$STAGING_PROJECT_REF"
-          supabase db push
+          supabase link --project-ref "$STAGING_PROJECT_REF" --workdir backend/database
+          supabase db push --workdir backend/database

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/ai
+        working-directory: backend/apps/ai
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7

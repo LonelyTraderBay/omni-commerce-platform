@@ -10,7 +10,7 @@ Background orchestration is needed for durable jobs and event handling. The plat
 
 ## Decision
 
-Inngest SDK usage, event publication, signing keys, and function routes live only in `apps/api`.
+Inngest SDK usage, event publication, signing keys, and function routes live only in `backend/apps/api`.
 
 Other services must call the API when they need work queued or events published. The web app must not call Inngest directly. The AI service must not host Inngest functions or own Inngest credentials.
 

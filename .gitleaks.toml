@@ -8,7 +8,7 @@ description = "expected non-secret paths"
 paths = [
   '''\.env\.example$''',
   '''pnpm-lock\.yaml$''',
-  '''apps/ai/uv\.lock$''',
+  '''backend/apps/ai/uv\.lock$''',
   '''docs/''',
   '''\.superpowers/''',
 ]

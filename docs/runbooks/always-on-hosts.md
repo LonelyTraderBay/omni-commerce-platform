@@ -6,9 +6,9 @@ Cold start = 0 trên critical path webhook Meta → api → (jobs) → ai.
 
 ## Checklist Render / Fly
 
-1. [ ] `apps/api` paid/always-on (no free sleep)  
-2. [ ] `apps/ai` paid/always-on  
-3. [ ] `apps/web` paid/always-on (hoặc CDN + origin always-on)  
+1. [ ] `backend/apps/api` paid/always-on (no free sleep)
+2. [ ] `backend/apps/ai` paid/always-on
+3. [ ] `frontend/apps/web` paid/always-on (hoặc CDN + origin always-on)
 4. [ ] Health: `/health` api, `/health` ai, web `/`  
 5. [ ] Meta webhook URL trỏ api always-on  
 6. [ ] Inngest endpoint reachable từ cloud  

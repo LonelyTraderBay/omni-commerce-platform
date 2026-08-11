@@ -2,7 +2,7 @@
 
 Checklist for submitting Omni Commerce Phase 1 (Facebook Page + Instagram DM inbox) to Meta App Review and running a controlled pilot on staging.
 
-**Code reference:** OAuth scopes in `apps/api/src/modules/channels/channels.service.ts`; webhook at `/v1/webhooks/meta`.
+**Code reference:** OAuth scopes in `backend/apps/api/src/modules/channels/channels.service.ts`; webhook at `/v1/webhooks/meta`.
 
 ---
 
@@ -46,8 +46,8 @@ Meta requires **public HTTPS** URLs that load without login.
 
 | URL (production example) | Route in repo |
 |--------------------------|---------------|
-| `https://<app-host>/legal/privacy` | `apps/web/src/app/legal/privacy/page.tsx` |
-| `https://<app-host>/legal/terms` | `apps/web/src/app/legal/terms/page.tsx` |
+| `https://<app-host>/legal/privacy` | `frontend/apps/web/src/app/legal/privacy/page.tsx` |
+| `https://<app-host>/legal/terms` | `frontend/apps/web/src/app/legal/terms/page.tsx` |
 
 | Item | Done | Notes |
 |------|:----:|-------|

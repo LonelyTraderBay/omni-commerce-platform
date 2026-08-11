@@ -3,7 +3,7 @@
 **Date:** 2026-07-25  
 **Branch:** `cursor/e2-completion`  
 **Canonical Plan E evidence:** [`docs/superpowers/plans/plan-e-dod-evidence.md`](../superpowers/plans/plan-e-dod-evidence.md)  
-**Harness:** `apps/api/src/modules/billing/entitlement-gate.proof.spec.ts`  
+**Harness:** `backend/apps/api/src/modules/billing/entitlement-gate.proof.spec.ts`
 **Architecture:** stub/invoice + plan flags (ADR 0004) — **no** Stripe/PayOS, **no** invented Supabase Pro.
 
 ## Eng-proven (R1 eng prep — GREEN without paid billing)
