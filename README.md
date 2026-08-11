@@ -1,13 +1,19 @@
 # Omni Commerce
 
-Monorepo for the web app, core API, AI service, and Supabase database used by the Vietnamese omni-commerce operating system.
+Monorepo for the Vietnamese omni-commerce operating system. The repository is
+split into clear ownership boundaries so backend services, frontend applications,
+database assets, and operational tooling can evolve independently.
 
-## Apps
+## Repository layout
 
-- `apps/web`: Next.js web application — locked port **`4700`**.
-- `apps/api`: NestJS core API — locked port **`4701`**.
-- `apps/ai`: FastAPI AI service — locked port **`4702`**.
-- `supabase`: local database — locked API **`54721`** (+ db/studio/mailpit; see `config/local-ports.json`).
+- `backend/apps/api`: NestJS core API — locked port **`4701`**.
+- `backend/apps/ai`: FastAPI AI service — locked port **`4702`**.
+- `backend/packages`: backend-only shared packages and API contracts.
+- `backend/database/supabase`: local database config, migrations, and seed — locked API **`54721`**.
+- `backend/tests`: isolation, evaluation, and backend fixtures.
+- `frontend/apps/web`: Next.js web application — locked port **`4700`**.
+- `infra/config`: local environment source-of-truth such as locked ports.
+- `infra/scripts`: local development, smoke-test, and staging operations.
 - Port lock (avoid collisions with other repos): [`docs/ops/local-ports.md`](docs/ops/local-ports.md).
 
 ## Prerequisites
@@ -17,28 +23,53 @@ Monorepo for the web app, core API, AI service, and Supabase database used by th
 - `uv` for the AI service.
 - Supabase CLI and Docker for local Supabase.
 
-## Environment
+## Local development profile
 
-Copy the example file and fill in local Supabase values after `supabase start` prints them:
+Development is local-first. `pnpm run dev:local` starts or reuses local Supabase
+and starts all application services on the locked ports below. It also syncs
+the local Supabase API/keys into `.env` and `frontend/apps/web/.env.local` without
+printing secrets.
+
+The local profile uses deterministic, in-process providers by default:
+
+- AI embeddings and completions: local stub (`AI_PROVIDER=stub` in the child processes)
+- E-invoice: `stub`
+- Shipping: `manual` or the explicit GHN mock option
+- Meta OAuth/page discovery/message sends: local stub (`META_INTEGRATION_MODE=stub`)
+- Sentry and paid provider calls: disabled unless explicitly enabled outside local mode
+
+Create the env file once if needed:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-For PowerShell terminals that run Node apps, load `.env` into the current process:
+Then start the complete local stack:
 
 ```powershell
-Get-Content .env | Where-Object { $_ -and $_ -notmatch '^\s*#' } | ForEach-Object { $name,$value = $_ -split '=',2; [Environment]::SetEnvironmentVariable($name,$value,'Process') }
+pnpm run dev:local:fresh
 ```
 
-## Run Supabase
+Stop Web, API, AI, Inngest and local Supabase together:
 
 ```powershell
-supabase start
-supabase db reset
+pnpm run dev:local:stop
 ```
 
-Use the local API URL, anon key, and service role key printed by Supabase to update:
+Use `AI_PROVIDER=gemini` or `AI_PROVIDER=openai` only for an intentional
+external-provider test. Do not put production credentials in the local profile.
+
+## Supabase troubleshooting
+
+```powershell
+pnpm dlx supabase status --workdir backend/database
+pnpm dlx supabase db reset --workdir backend/database
+```
+
+`db reset` is destructive to local test data and is not run automatically. The
+normal `dev:local` command only starts containers and applies pending migrations.
+
+The local script automatically syncs the following values from Supabase status:
 
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
@@ -46,42 +77,15 @@ Use the local API URL, anon key, and service role key printed by Supabase to upd
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-## Install dependencies
+## Install dependencies manually (optional)
 
 ```powershell
 corepack enable
 pnpm install
-cd apps/ai
-uv sync
-cd ../..
+uv sync --directory backend/apps/ai
 ```
 
-## Run all three apps
-
-Open separate terminals from the repo root.
-
-API:
-
-```powershell
-Get-Content .env | Where-Object { $_ -and $_ -notmatch '^\s*#' } | ForEach-Object { $name,$value = $_ -split '=',2; [Environment]::SetEnvironmentVariable($name,$value,'Process') }
-pnpm --dir apps/api dev
-```
-
-Web:
-
-```powershell
-Get-Content .env | Where-Object { $_ -and $_ -notmatch '^\s*#' } | ForEach-Object { $name,$value = $_ -split '=',2; [Environment]::SetEnvironmentVariable($name,$value,'Process') }
-pnpm --dir apps/web dev
-```
-
-AI:
-
-```powershell
-Copy-Item .env apps/ai/.env -Force
-# Preferred one-shot (uses locked ports from config/local-ports.json):
-pnpm run ports:sync
-pnpm run dev:local
-```
+## Service URLs
 
 Health checks (locked):
 
@@ -100,29 +104,23 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm test:isolation
-cd apps/ai
-uv run pytest -q
-cd ../..
-python tests/eval/run_stub.py
+uv run --directory backend/apps/ai pytest -q
+python backend/tests/eval/run_stub.py
 ```
 
 ## Manual smoke
 
-Requires Docker, Supabase, API, AI, web, and Inngest dev services:
+The one-shot local command starts Docker Supabase, API, AI, Web and Inngest:
 
 ```powershell
-npx supabase start
-npx supabase db reset
-pnpm run ports:sync
-pnpm run dev:local
-# or manually: API :4701 · AI :4702 · Web :4700 · Inngest :4788
+pnpm run dev:local:fresh
 ```
 
 Then probe API `/health` and `/ready`, AI `/health`, web shell, `GET /internal/v1/ai/health` with `X-Service-Key`, and insert a `platform.noop` outbox row to confirm Inngest receives it.
 
 ## Meta webhook (local)
 
-1. Chạy api: `pnpm run dev:local` (API **:4701**)
+1. Chạy local stack: `pnpm run dev:local` (API **:4701**)
 2. Tunnel: `cloudflared tunnel --url http://127.0.0.1:4701` (hoặc ngrok)
 3. Meta Webhook Callback URL: `https://<tunnel>/v1/webhooks/meta`
 4. Verify token = `META_VERIFY_TOKEN`

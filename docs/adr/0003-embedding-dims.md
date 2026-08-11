@@ -28,5 +28,5 @@ Environment variable for the AI service should reference the same model id (e.g.
 ## References
 
 - Structure doc §8.5 (`knowledge_chunks`)
-- Migration `supabase/migrations/20260725100000_catalog_knowledge_ai.sql`
+- Migration `backend/database/supabase/migrations/20260725100000_catalog_knowledge_ai.sql`
 - [Gemini embeddings — text-embedding-004](https://ai.google.dev/gemini-api/docs/embeddings)

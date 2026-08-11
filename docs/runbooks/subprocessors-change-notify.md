@@ -15,7 +15,7 @@ Use when a **material** subprocessor is added, removed, or materially changes pu
 ## Checklist
 
 - [ ] Diff recorded: old → new vendor / purpose / data / region
-- [ ] Update `docs/legal/subprocessors.md` and `apps/web/.../legal/subprocessors/page.tsx` (same list)
+- [ ] Update `docs/legal/subprocessors.md` and `frontend/apps/web/.../legal/subprocessors/page.tsx` (same list)
 - [ ] Deploy public page; confirm `/legal/subprocessors` shows new list
 - [ ] Fill email and/or in-app template below; legal/owner **approve**
 - [ ] Send to affected pilot/enterprise contacts (or in-app banner to those orgs)

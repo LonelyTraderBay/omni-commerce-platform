@@ -12,6 +12,6 @@ updates:
       interval: weekly
 
   - package-ecosystem: pip
-    directory: /apps/ai
+    directory: /backend/apps/ai
     schedule:
       interval: weekly

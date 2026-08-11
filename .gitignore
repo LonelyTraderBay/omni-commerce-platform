@@ -9,15 +9,26 @@ node_modules/
 .turbo/
 dist/
 .next/
-apps/ai/.venv/
+backend/apps/ai/.venv/
 __pycache__/
 .pytest_cache/
 coverage/
-supabase/.temp/
+backend/database/supabase/.temp/
 .local-secrets/
 
 # local supabase CLI branch marker
-supabase/.branches/
+backend/database/supabase/.branches/
+
+# Supabase CLI runtime artifacts, including runs started from a nested path
+**/.temp/
+**/.branches/
+
+# Guard against an accidental nested Supabase project created by a wrong workdir
+backend/database/supabase/supabase/
+
+# Local browser/probe artifacts
+.playwright-cli/
+frontend/apps/web/.tmp-probe-errors.mjs
 
 # per-process LLM spend counter (LLM_SPEND_COUNTER_PATH)
 .llm-spend.json

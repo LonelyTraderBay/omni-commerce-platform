@@ -52,7 +52,7 @@ services:
     runtime: python
     plan: free
     region: singapore
-    rootDir: apps/ai
+    rootDir: backend/apps/ai
     buildCommand: pip install uv && UV_PYTHON_DOWNLOADS=automatic uv python install 3.12 && UV_PYTHON_DOWNLOADS=automatic uv sync --frozen --python 3.12
     startCommand: uv run --python 3.12 uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health

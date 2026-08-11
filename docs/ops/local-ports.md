@@ -1,6 +1,6 @@
 # Local ports — Omni Commerce (locked)
 
-**SoT:** [`config/local-ports.json`](../../config/local-ports.json)
+**SoT:** [`infra/config/local-ports.json`](../../infra/config/local-ports.json)
 
 Dải cổng **cố định** cho repo `omni-commerce-platform` để không trùng dự án khác trên cùng máy (Next mặc định `:3000`, FastAPI `:8000`, Supabase mặc định `:54321`, …).
 
@@ -24,30 +24,30 @@ Dải cổng **cố định** cho repo `omni-commerce-platform` để không tr�
 pnpm run ports:sync
 ```
 
-Cập nhật `PORT` / `*_URL` trong `.env`, `apps/web/.env.local`, `apps/ai/.env`, `.env.example` theo JSON (không đụng secret khác).
+Cập nhật `PORT` / `*_URL` trong `.env`, `frontend/apps/web/.env.local`, `backend/apps/ai/.env`, `.env.example` theo JSON (không đụng secret khác).
 
 ## Khởi động / dừng
 
 ```powershell
 # Lần đầu hoặc sau khi đổi cổng Supabase:
-npx supabase stop
-npx supabase start
+npx supabase stop --workdir backend/database
+npx supabase start --workdir backend/database
 
 pnpm run ports:sync
 pnpm run dev:local:stop   # dọn cổng Omni + PID cũ
 pnpm run dev:local        # fail nếu cổng app bị chiếm
 ```
 
-`dev:local` đọc `config/local-ports.json`, set `PORT` / URL cho process con, Inngest `-p 4788`.  
+`dev:local` đọc `infra/config/local-ports.json`, set `PORT` / URL cho process con, Inngest `-p 4788`.
 `dev:local:stop` kill theo PID file **và** theo cổng locked (tránh Inngest orphan).
 
 ## Đổi cổng
 
-1. Sửa `config/local-ports.json`
-2. Sửa `supabase/config.toml` (`[api]`/`[db]`/`[studio]`/`[inbucket]`/`[analytics]`) cho khớp
-3. Sửa `apps/web` `package.json` script `dev -p …` cho khớp (fallback khi không qua `dev:local`)
+1. Sửa `infra/config/local-ports.json`
+2. Sửa `backend/database/supabase/config.toml` (`[api]`/`[db]`/`[studio]`/`[inbucket]`/`[analytics]`) cho khớp
+3. Sửa `frontend/apps/web` `package.json` script `dev -p …` cho khớp (fallback khi không qua `dev:local`)
 4. `pnpm run ports:sync`
-5. `npx supabase stop` → `npx supabase start` → `pnpm run dev:local`
+5. `npx supabase stop --workdir backend/database` → `npx supabase start --workdir backend/database` → `pnpm run dev:local`
 
 ## Sự cố thường gặp
 
@@ -55,13 +55,13 @@ pnpm run dev:local        # fail nếu cổng app bị chiếm
 
 **Triệu chứng:** mọi trang render bình thường nhưng cứ vài giây lại tự reload; `.local-secrets\logs\web.err.log` đầy lỗi lặp `FATAL: An unexpected Turbopack error ... Next.js package not found` (panic trong `hmr_version_state`).
 
-**Nguyên nhân:** cache Turbopack trên đĩa (`apps/web/.next`) bị hỏng — thường sau khi đổi git branch nhiều lần trong khi dev server đang chạy. Restart server thường **không** chữa được vì cache hỏng nằm trên đĩa.
+**Nguyên nhân:** cache Turbopack trên đĩa (`frontend/apps/web/.next`) bị hỏng — thường sau khi đổi git branch nhiều lần trong khi dev server đang chạy. Restart server thường **không** chữa được vì cache hỏng nằm trên đĩa.
 
 **Cách sửa:**
 
 ```powershell
 pnpm run dev:local:stop
-pnpm run dev:local:fresh   # = dev:local nhưng xoá apps/web/.next trước khi start web
+pnpm run dev:local:fresh   # = dev:local nhưng xoá frontend/apps/web/.next trước khi start web
 ```
 
 (Đã gặp và xác minh 2026-07-29: 1.658 panic/40 phút → 0 sau khi xoá cache; trang sống ổn định >100 giây thay vì reload mỗi vài giây.)

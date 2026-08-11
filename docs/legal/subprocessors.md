@@ -23,7 +23,7 @@
 ## Liên kết
 
 - [DPA mẫu](./dpa-template.md)  
-- [Privacy (app)](../../apps/web/src/app/legal/privacy/page.tsx)  
-- [Subprocessors public page](../../apps/web/src/app/legal/subprocessors/page.tsx)
+- [Privacy (app)](../../frontend/apps/web/src/app/legal/privacy/page.tsx)
+- [Subprocessors public page](../../frontend/apps/web/src/app/legal/subprocessors/page.tsx)
 - [Subprocessors change — customer notification](../runbooks/subprocessors-change-notify.md)
 - [PDPA delete runbook](../runbooks/pdpa-delete.md)

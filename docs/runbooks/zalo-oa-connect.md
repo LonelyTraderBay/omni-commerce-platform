@@ -7,7 +7,7 @@ Wave 2F + E1 ship a working Zalo OA inbound path for inbox multi-channel readine
 - `POST /v1/channels/zalo/connect` stores an existing OA access token encrypted in `channel_connections` (token-paste connect; not full OAuth yet).
 - `POST /v1/channels/zalo/webhook` verifies an optional shared secret, records `webhook_receipts`, and atomically enqueues `zalo/inbound.received`.
 - Outbox publisher maps `zalo/inbound.received` → Inngest `zalo/inbound/received`.
-- Worker `zalo-persist-inbound` (`apps/api/src/jobs/functions/zalo-persist-inbound.ts`) persists contacts, conversations, and inbound messages for mapped OAs.
+- Worker `zalo-persist-inbound` (`backend/apps/api/src/jobs/functions/zalo-persist-inbound.ts`) persists contacts, conversations, and inbound messages for mapped OAs.
 
 Status:
 

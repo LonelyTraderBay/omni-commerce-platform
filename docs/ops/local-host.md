@@ -1,12 +1,12 @@
 # Local host mode (PC as server)
 
-> **SoT local ports (current):** [`config/local-ports.json`](../../config/local-ports.json) · [`local-ports.md`](./local-ports.md)  
+> **SoT local ports (current):** [`infra/config/local-ports.json`](../../infra/config/local-ports.json) · [`local-ports.md`](./local-ports.md)
 > Web **4700** · API **4701** · AI **4702** · Inngest **4788** · Supabase API **54721**.  
 > Rows below that still mention `:3000` / `:3001` / `:8000` / `:54321` are **legacy evidence** — do **not** use those ports for new runs.
 
 Full local stack: Supabase (Docker) + API + Web + AI on this machine.
 
-**Port lock (anti-collision):** [`local-ports.md`](./local-ports.md) · SoT `config/local-ports.json`  
+**Port lock (anti-collision):** [`local-ports.md`](./local-ports.md) · SoT `infra/config/local-ports.json`
 Omni uses **4700 / 4701 / 4702 / 4788 / 54721+** — not the common `3000/3001/8000/54321` block.
 
 > **Default for coding / SDD (2026-07-26):** Local-first is the default development surface. Render staging payment / Starter and Meta App Review are **deferred** until owner wants to **claim CPC thương mại** (Gate R0 live) — see [L1 plan](../superpowers/plans/2026-07-26-sdd-l1-local-first.md) and [completion-step-by-step](../superpowers/plans/2026-07-25-completion-step-by-step.md).
@@ -20,15 +20,15 @@ Omni uses **4700 / 4701 / 4702 / 4788 / 54721+** — not the common `3000/3001/8
 
 ```powershell
 $env:Path = "C:\Program Files\Docker\Docker\resources\bin;$env:Path"
-npx supabase start
-npx supabase status -o env
+npx supabase start --workdir backend/database
+npx supabase status --workdir backend/database -o env
 ```
 
-If Omni Supabase ports (`54721`+) conflict, stop the other stack — do **not** change Omni ports ad-hoc; edit `config/local-ports.json` + `supabase/config.toml` together.
+If Omni Supabase ports (`54721`+) conflict, stop the other stack — do **not** change Omni ports ad-hoc; edit `infra/config/local-ports.json` + `backend/database/supabase/config.toml` together.
 
 ```powershell
-npx supabase stop --project-id omni-commerce
-npx supabase start
+npx supabase stop --project-id omni-commerce --workdir backend/database
+npx supabase start --workdir backend/database
 ```
 
 ## Point apps at local Supabase
@@ -37,10 +37,10 @@ npx supabase start
 pnpm run ports:sync
 ```
 
-`.env`, `apps/web/.env.local`, `apps/ai/.env` must use:
+`.env`, `frontend/apps/web/.env.local`, `backend/apps/ai/.env` must use:
 
 - `SUPABASE_URL=http://127.0.0.1:54721` (locked)
-- local anon / service_role keys from `supabase status`
+- local anon / service_role keys from `supabase status --workdir backend/database`
 
 ## Start / stop apps
 
@@ -51,7 +51,7 @@ pnpm run dev:local:stop
 
 `dev:local` starts **API + Web + AI + Inngest Dev Server** (separate process).  
 Inngest CLI (locked): `npx --yes inngest-cli@latest dev -u http://127.0.0.1:4701/api/inngest -p 4788`  
-Skip one service: `scripts/dev-local.ps1 -NoInngest` (also `-NoApi` / `-NoWeb` / `-NoAi`).
+Skip one service: `infra/scripts/dev-local.ps1 -NoInngest` (also `-NoApi` / `-NoWeb` / `-NoAi`).
 
 AI process gets `APP_ENV=local` and `EMBEDDINGS_ALLOW_STUB=1` when unset so stub embeddings work without Gemini.
 
@@ -113,7 +113,7 @@ EMBEDDINGS_ALLOW_STUB=1
 
 Restart AI after env changes (`pnpm run dev:local` or restart AI process).
 
-Unit coverage: `cd apps/ai; uv run pytest tests/test_stub_embeddings.py -q`
+Unit coverage: `uv run --directory backend/apps/ai pytest tests/test_stub_embeddings.py -q`
 
 ### E0.2 local verify (2026-07-26 · L1 Task 3)
 
@@ -171,7 +171,7 @@ One command proves the non-Meta happy path against a running local stack (no Pla
 
 **Prerequisites**
 
-1. Docker Desktop up; local Supabase (`npx supabase start`)
+1. Docker Desktop up; local Supabase (`npx supabase start --workdir backend/database`)
 2. `.env` at repo root (or worktree) with `SUPABASE_URL=http://127.0.0.1:54721` + local `SUPABASE_ANON_KEY` (`pnpm run ports:sync`)
 3. Apps up: `pnpm run dev:local` — API must answer `GET http://127.0.0.1:4701/health` → `{"status":"ok"}` (script **fails clearly** if health is down)
 
@@ -179,7 +179,7 @@ One command proves the non-Meta happy path against a running local stack (no Pla
 
 ```powershell
 pnpm run test:e2e:local
-# or: node scripts/local-e2e-smoke.mjs
+# or: node infra/scripts/local-e2e-smoke.mjs
 # optional: $env:API_BASE_URL = "http://127.0.0.1:4701"
 ```
 
@@ -200,5 +200,6 @@ Meta cannot call localhost. Use Cloudflare Tunnel / ngrok when testing webhooks.
 
 Orgs created without a default warehouse caused `POST /v1/orders/:id/confirm` → `500 orders_failed`.
 Migration `20260727210000_ensure_default_warehouse_on_org.sql` creates `Kho chính` / `MAIN` on
-org insert and backfills existing orgs. Apply locally with `npx supabase db reset` or
-`npx supabase migration up --local`.
+org insert and backfills existing orgs. Apply locally with
+`npx supabase db reset --workdir backend/database` or
+`npx supabase migration up --workdir backend/database`.

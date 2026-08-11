@@ -2,7 +2,7 @@
 
 ## Order
 
-All files under `supabase/migrations/` apply in filename order. After Plan D, critical ones include:
+All files under `backend/database/supabase/migrations/` apply in filename order. After Plan D, critical ones include:
 
 - `20260725*` meta / catalog / AI / draft orders  
 - `20260726*` orders lifecycle / RPCs  
@@ -11,14 +11,14 @@ All files under `supabase/migrations/` apply in filename order. After Plan D, cr
 
 ```bash
 # Link staging project (once)
-npx supabase link --project-ref <STAGING_PROJECT_REF>
+npx supabase link --project-ref <STAGING_PROJECT_REF> --workdir backend/database
 
 # Dry review
-npx supabase db push --dry-run
+npx supabase db push --workdir backend/database --dry-run
 
 # Apply
-npx supabase db reset   # destructive, staging only — OR
-npx supabase db push    # forward migrations
+npx supabase db reset --workdir backend/database   # destructive, staging only — OR
+npx supabase db push --workdir backend/database    # forward migrations
 ```
 
 ## Verify
