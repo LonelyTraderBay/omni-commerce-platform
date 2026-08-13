@@ -289,16 +289,24 @@ if (-not (Test-Path $aiPythonExe)) {
   throw "backend\apps\ai\.venv\Scripts\python.exe not found after uv sync"
 }
 
-if (-not $env:APP_ENV -or $env:APP_ENV.Trim() -eq "") {
-  $env:APP_ENV = "local"
-}
 $env:APP_ENV = "local"
-$env:AI_PROVIDER = "stub"
+$requestedAiProvider = if ($env:AI_PROVIDER) {
+  $env:AI_PROVIDER.Trim().ToLowerInvariant()
+} else {
+  ""
+}
+if (-not $requestedAiProvider) {
+  $env:AI_PROVIDER = "stub"
+} elseif (@("stub", "gemini", "openai") -notcontains $requestedAiProvider) {
+  throw "AI_PROVIDER must be stub, gemini, or openai"
+} else {
+  $env:AI_PROVIDER = $requestedAiProvider
+}
 $env:EINVOICE_PROVIDER = "stub"
 $env:EINVOICE_SANDBOX_URL = ""
 $env:META_INTEGRATION_MODE = "stub"
 $env:SENTRY_DSN = ""
-$env:AI_MODEL_ALLOWLIST = "advisor-stub,gemini-2.0-flash"
+$env:AI_MODEL_ALLOWLIST = "advisor-stub,gemini-2.0-flash,gpt-4o-mini"
 if (-not $env:EMBEDDINGS_ALLOW_STUB -or $env:EMBEDDINGS_ALLOW_STUB.Trim() -eq "") {
   $env:EMBEDDINGS_ALLOW_STUB = "1"
 }
@@ -402,5 +410,5 @@ Write-Host ""
 Write-Host "Port lock: infra\config\local-ports.json | Sync env: pnpm run ports:sync"
 Write-Host "Logs: .local-secrets\logs\"
 Write-Host "Stop:  pnpm run dev:local:stop"
-Write-Host "Local mode: AI_PROVIDER=stub, EINVOICE_PROVIDER=stub, META_INTEGRATION_MODE=stub, APP_ENV=local"
+Write-Host ("Local mode: AI_PROVIDER={0}, EINVOICE_PROVIDER=stub, META_INTEGRATION_MODE=stub, APP_ENV=local" -f $env:AI_PROVIDER)
 Write-Host ("Chunks smoke: create product -> docker exec supabase_db_omni-commerce psql -U postgres -d postgres -t -c `"select count(*) from knowledge_chunks;`"")

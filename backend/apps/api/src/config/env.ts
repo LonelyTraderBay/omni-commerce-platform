@@ -18,7 +18,9 @@ export const EnvSchema = z.object({
   INNGEST_SIGNING_KEY: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   PLATFORM_ADMIN_EMAILS: z.string().default(''),
-  AI_MODEL_ALLOWLIST: z.string().default('gemini-2.0-flash,advisor-stub'),
+  AI_MODEL_ALLOWLIST: z
+    .string()
+    .default('gemini-2.0-flash,advisor-stub,gpt-4o-mini'),
   DEFAULT_AI_DRAFT_MAX_AMOUNT_VND: z.coerce
     .number()
     .int()

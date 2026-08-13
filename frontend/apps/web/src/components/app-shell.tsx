@@ -26,6 +26,10 @@ import {
 } from '../lib/org-context';
 import { getSupabaseBrowserClient } from '../lib/supabase-browser';
 import {
+  isUiPreviewEnabled,
+  UI_PREVIEW_ORGANIZATION,
+} from '../lib/ui-preview';
+import {
   Button,
   colorBackgroundCard,
   colorBorder,
@@ -40,17 +44,19 @@ import {
 
 // Standalone, always-first item — not part of any group (see `navGroups`
 // below), matching the sidebar spec's "Tổng quan" placement.
-const dashboardNavItem = { href: '/dashboard', label: 'Tổng quan' };
+const dashboardNavItem = { href: '/dashboard', label: 'Tổng quan', badge: '01' };
 
 // Same 20 hrefs/labels the flat `navItems` list used to hold, reorganized
 // into the sidebar's 4 named groups. Every href/label pair below is
 // unchanged from the previous flat list.
 const navGroups: Array<{
   label: string;
+  badge: string;
   items: Array<{ href: string; label: string }>;
 }> = [
   {
     label: 'Bán hàng',
+    badge: 'BH',
     items: [
       { href: '/inbox', label: 'Hộp thư' },
       { href: '/orders', label: 'Đơn hàng' },
@@ -62,6 +68,7 @@ const navGroups: Array<{
   },
   {
     label: 'Kho & Sản phẩm',
+    badge: 'KHO',
     items: [
       { href: '/catalog', label: 'Sản phẩm' },
       { href: '/inventory', label: 'Kho' },
@@ -72,6 +79,7 @@ const navGroups: Array<{
   },
   {
     label: 'Marketing & AI',
+    badge: 'AI',
     items: [
       { href: '/ads', label: 'Ads' },
       { href: '/attribution', label: 'Attribution' },
@@ -81,6 +89,7 @@ const navGroups: Array<{
   },
   {
     label: 'Cài đặt',
+    badge: 'SET',
     items: [
       { href: '/settings/channels', label: 'Kênh' },
       { href: '/settings/billing', label: 'Thanh toán' },
@@ -104,20 +113,63 @@ function isActiveNavItem(pathname: string, href: string) {
 // `#64748b`, a different value), so it stays a plain literal, same as before.
 function navLinkStyle(active: boolean): CSSProperties {
   return {
+    alignItems: 'center',
+    background: active ? '#dbeafe' : 'transparent',
+    border: `1px solid ${active ? '#bfdbfe' : 'transparent'}`,
+    borderRadius: 9,
+    boxSizing: 'border-box',
     color: active ? colorPrimary : '#475569',
-    fontSize: 14,
+    display: 'flex',
+    fontSize: 13,
     fontWeight: active ? 700 : 600,
+    gap: 10,
+    minHeight: 30,
+    padding: '3px 7px',
     textDecoration: 'none',
   };
 }
 
 const groupLabelStyle: CSSProperties = {
+  alignItems: 'center',
   color: colorTextMuted,
+  display: 'flex',
   fontSize: 12,
   fontWeight: 700,
+  gap: 8,
   letterSpacing: 0.6,
+  margin: '1px 3px 4px',
   textTransform: 'uppercase',
 };
+
+const groupStyle: CSSProperties = {
+  background: colorBackgroundCard,
+  border: `1px solid ${colorBorder}`,
+  borderRadius: 12,
+  padding: 5,
+};
+
+const groupBadgeStyle: CSSProperties = {
+  alignItems: 'center',
+  background: '#f1f5f9',
+  borderRadius: 6,
+  color: '#475569',
+  display: 'inline-flex',
+  fontSize: 10,
+  fontWeight: 800,
+  height: 20,
+  justifyContent: 'center',
+  letterSpacing: 0,
+  minWidth: 24,
+  padding: '0 5px',
+};
+
+const navDotStyle = (active: boolean): CSSProperties => ({
+  background: active ? colorPrimary : '#cbd5e1',
+  borderRadius: '50%',
+  flexShrink: 0,
+  height: 6,
+  width: 6,
+});
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -128,12 +180,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
+    const previewMode = isUiPreviewEnabled();
+
     function loadSession(event?: Event) {
       if (event && isForeignStorageEvent(event)) {
         return;
       }
       const token = getAccessToken();
-      if (!token) {
+      if (!token && !previewMode) {
         router.replace('/login');
         return;
       }
@@ -158,6 +212,13 @@ export function AppShell({ children }: { children: ReactNode }) {
     window.addEventListener('storage', loadSession);
 
     let authSubscription: { unsubscribe: () => void } | undefined;
+    if (previewMode) {
+      return () => {
+        window.removeEventListener(SESSION_CHANGED_EVENT, loadSession);
+        window.removeEventListener('storage', loadSession);
+      };
+    }
+
     try {
       const subscription = getSupabaseBrowserClient().auth.onAuthStateChange(
         (event, session) => {
@@ -183,6 +244,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [router]);
 
   async function handleRefreshOrganizations() {
+    if (isUiPreviewEnabled()) {
+      setOrganizations([UI_PREVIEW_ORGANIZATION]);
+      setActiveOrgIdState(UI_PREVIEW_ORGANIZATION.id);
+      setMessage('Đang xem giao diện với dữ liệu demo.');
+      return;
+    }
+
     setRefreshing(true);
     setMessage(null);
 
@@ -227,13 +295,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{
           background: colorBackgroundCard,
           borderRight: `1px solid ${colorBorder}`,
+          boxShadow: '4px 0 18px rgba(15, 23, 42, 0.03)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
           flexShrink: 0,
-          gap: 24,
-          padding: '20px 16px',
-          width: 240,
+          gap: 10,
+          minHeight: '100vh',
+          overflowY: 'auto',
+          padding: '12px 9px',
+          width: 268,
         }}
       >
         <Link
@@ -242,35 +313,53 @@ export function AppShell({ children }: { children: ReactNode }) {
             color: colorTextBody,
             fontSize: 18,
             fontWeight: 800,
+            padding: '0 8px',
             textDecoration: 'none',
           }}
         >
           Omni Commerce
         </Link>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           <Link
             href={dashboardNavItem.href}
             style={navLinkStyle(isActiveNavItem(pathname, dashboardNavItem.href))}
           >
-            {dashboardNavItem.label}
+            <span
+              aria-hidden="true"
+              style={groupBadgeStyle}
+            >
+              {dashboardNavItem.badge}
+            </span>
+            <span>{dashboardNavItem.label}</span>
           </Link>
 
           {navGroups.map((group) => (
             <div
               key={group.label}
-              style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+              style={groupStyle}
             >
-              <span style={groupLabelStyle}>{group.label}</span>
-              {group.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  style={navLinkStyle(isActiveNavItem(pathname, item.href))}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              <div style={groupLabelStyle}>
+                <span aria-hidden="true" style={groupBadgeStyle}>
+                  {group.badge}
+                </span>
+                <span>{group.label}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {group.items.map((item) => {
+                  const active = isActiveNavItem(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      style={navLinkStyle(active)}
+                    >
+                      <span aria-hidden="true" style={navDotStyle(active)} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </nav>
@@ -323,20 +412,38 @@ export function AppShell({ children }: { children: ReactNode }) {
             </select>
           </label>
 
-          <Button
-            variant="secondary"
-            onClick={() => void handleRefreshOrganizations()}
-            disabled={refreshing}
-          >
-            {refreshing ? 'Đang tải...' : 'Tải tổ chức'}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => void handleSignOut()}
-            style={{ color: colorDanger }}
-          >
-            Đăng xuất
-          </Button>
+          {isUiPreviewEnabled() ? (
+            <span
+              style={{
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: radiusSm,
+                color: '#1d4ed8',
+                fontSize: 13,
+                fontWeight: 700,
+                padding: '9px 12px',
+              }}
+            >
+              Chế độ xem UI · dữ liệu demo
+            </span>
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => void handleRefreshOrganizations()}
+                disabled={refreshing}
+              >
+                {refreshing ? 'Đang tải...' : 'Tải tổ chức'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => void handleSignOut()}
+                style={{ color: colorDanger }}
+              >
+                Đăng xuất
+              </Button>
+            </>
+          )}
         </header>
 
         {message ? (

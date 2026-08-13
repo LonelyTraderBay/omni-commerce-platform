@@ -29,6 +29,8 @@ Nhiều uvicorn worker ⇒ cap thực tế là per-worker. Muốn cap toàn cụ
 
 - Primary: Gemini (`GeminiLlmProvider`)  
 - Secondary: OpenAI (`OpenAiLlmProvider`) khi `OPENAI_API_KEY` được set và primary **down**  
+- `/ai/advise` dùng cùng provider factory với `process-message`; `AI_PROVIDER=openai`
+  chọn OpenAI trực tiếp, còn staging mặc định dùng Gemini primary và OpenAI fallback.
 
 Failover: thử secondary một lần; nếu cả hai fail → escalate.
 

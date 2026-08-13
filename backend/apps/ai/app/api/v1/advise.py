@@ -9,8 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.config import settings
 from app.infra.core import CoreKnowledgeClient
-from app.infra.llm.gemini import GeminiLlmProvider
-from app.infra.llm.factory import external_ai_enabled
+from app.infra.llm.factory import create_llm_provider, external_ai_enabled
 from app.infra.llm.spend import LlmSpendTracker
 
 router = APIRouter(prefix="/internal/v1")
@@ -45,12 +44,23 @@ class AdviseRequest(BaseModel):
 
 def _advisor_model(allowlist: str) -> str:
     models = [item.strip() for item in allowlist.split(",") if item.strip()]
+
+    provider_mode = settings.ai_provider.strip().lower()
+    if provider_mode == "openai":
+        if settings.openai_model in models:
+            return settings.openai_model
+        for model in models:
+            if model.startswith(("gpt-", "chatgpt-", "o1", "o3", "o4")):
+                return model
+
     if "gemini-2.0-flash" in models:
         return "gemini-2.0-flash"
     for model in models:
         if model != "advisor-stub":
             return model
-    raise RuntimeError("AI_MODEL_ALLOWLIST must include a non-stub model for Gemini advisor")
+    raise RuntimeError(
+        "AI_MODEL_ALLOWLIST must include a non-stub model for the advisor"
+    )
 
 
 def _build_advisor_messages(
@@ -116,7 +126,7 @@ def _stub_response(
     }
 
 
-def _gemini_response(
+def _external_response(
     org_id: str,
     goal: str,
     catalog_aggregates: dict[str, Any],
@@ -148,10 +158,10 @@ def _gemini_response(
             return None
 
     try:
-        provider = GeminiLlmProvider()
+        provider = create_llm_provider()
         completion = provider.complete(model=model, messages=messages)
     except Exception:
-        logger.exception("Gemini advisor failed; falling back to stub")
+        logger.exception("External advisor provider failed; falling back to stub")
         return None
 
     # The money is already spent past this point: record it, and never discard a
@@ -184,7 +194,7 @@ def _gemini_response(
         "toolsUsed": [
             {
                 "kind": "advisor",
-                "mode": "gemini",
+                "mode": _provider_mode(completion.model),
                 "catalogAggregate": catalog_aggregates.get("note") or "catalog aggregates",
                 "salesAggregate": sales_aggregates.get("note") or "sales aggregates",
             },
@@ -208,14 +218,22 @@ def advise(
     catalog_note = body.catalog_aggregates.get("note") or "catalog aggregate stub"
     sales_note = body.sales_aggregates.get("note") or "sales aggregate stub"
 
-    if settings.gemini_api_key and external_ai_enabled():
-        gemini_result = _gemini_response(
+    if (settings.gemini_api_key or settings.openai_api_key) and external_ai_enabled():
+        external_result = _external_response(
             str(body.org_id),
             goal,
             body.catalog_aggregates,
             body.sales_aggregates,
         )
-        if gemini_result is not None:
-            return gemini_result
+        if external_result is not None:
+            return external_result
 
     return _stub_response(goal, catalog_note, sales_note)
+
+
+def _provider_mode(model: str) -> str:
+    if model.startswith(("gpt-", "chatgpt-", "o1", "o3", "o4")):
+        return "openai"
+    if model.startswith("gemini-"):
+        return "gemini"
+    return "external"

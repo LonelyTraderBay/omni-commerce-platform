@@ -17,7 +17,7 @@ import { AiRunsService, type SupabaseLike } from "./ai-runs.service";
  * failed with 400 "ai_model_not_allowed" *after* the AI service had already
  * returned a valid stub suggestion — the whole /advisor page was unusable
  * out of the box. render.yaml's deployed config already carried the correct
- * value (gemini-2.0-flash,advisor-stub), confirming this was drift in the
+ * value (gemini-2.0-flash,advisor-stub,gpt-4o-mini), confirming this was drift in the
  * local template rather than an intentional restriction.
  *
  * This test parses the real, tracked .env.example (the template new local
@@ -80,6 +80,8 @@ describe("AI_MODEL_ALLOWLIST local dev template (regression: advisor stub was re
   it(".env.example allows the literal model name the local/stub AI advisor returns", async () => {
     const allowlist = readAiModelAllowlistFromEnvExample();
     vi.stubEnv("AI_MODEL_ALLOWLIST", allowlist);
+
+    expect(allowlist.split(",")).toContain("gpt-4o-mini");
 
     const service = new AiRunsService(mockSupabase());
 

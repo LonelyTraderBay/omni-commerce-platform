@@ -10,7 +10,10 @@
 
 1. Gọi health check: `GET /health` trên AI service.
 2. Kiểm tra Render service của `backend/apps/ai`: trạng thái deploy, restart loop, CPU/RAM, log gần nhất.
-3. Kiểm tra biến môi trường AI: `SERVICE_M2M_KEY`, `CORE_BASE_URL`, `AI_MODEL_ALLOWLIST`, provider key.
+3. Kiểm tra biến môi trường AI: `SERVICE_M2M_KEY`, `CORE_BASE_URL`, `APP_ENV`,
+   `AI_PROVIDER`, `AI_MODEL_ALLOWLIST`, `OPENAI_MODEL`, và provider key.
+   Staging/production phải có `APP_ENV=production`; local mặc định phải dùng
+   `AI_PROVIDER=stub`.
 4. Kiểm tra API có trỏ đúng `AI_BASE_URL` và không bị chặn mạng nội bộ.
 
 ## Hành động

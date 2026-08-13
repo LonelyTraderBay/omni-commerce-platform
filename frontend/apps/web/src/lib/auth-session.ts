@@ -4,6 +4,11 @@ import {
   resolveActiveOrgId,
   setActiveOrgId,
 } from './org-context';
+import {
+  isUiPreviewEnabled,
+  UI_PREVIEW_ACCESS_TOKEN,
+  UI_PREVIEW_ORGANIZATION,
+} from './ui-preview';
 
 export const ACCESS_TOKEN_STORAGE_KEY = 'omni.accessToken';
 export const ORGANIZATIONS_STORAGE_KEY = 'omni.organizations';
@@ -58,12 +63,22 @@ export function getAccessToken(): string | null {
     return null;
   }
 
-  return window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  if (isUiPreviewEnabled()) {
+    return UI_PREVIEW_ACCESS_TOKEN;
+  }
+
+  return (
+    window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) ?? null
+  );
 }
 
 export function getStoredOrganizations(): StoredOrganization[] {
   if (typeof window === 'undefined') {
     return [];
+  }
+
+  if (isUiPreviewEnabled()) {
+    return [UI_PREVIEW_ORGANIZATION];
   }
 
   const raw = window.localStorage.getItem(ORGANIZATIONS_STORAGE_KEY);

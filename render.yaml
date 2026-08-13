@@ -43,7 +43,7 @@ services:
       - key: META_GRAPH_VERSION
         value: v21.0
       - key: AI_MODEL_ALLOWLIST
-        value: gemini-2.0-flash,advisor-stub
+        value: gemini-2.0-flash,advisor-stub,gpt-4o-mini
       - key: RATE_LIMIT_ENABLED
         value: "true"
 
@@ -60,6 +60,10 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.8"
+      - key: APP_ENV
+        value: production
+      - key: AI_PROVIDER
+        value: gemini
       - key: SERVICE_M2M_KEY
         fromService:
           name: omni-api-staging
@@ -68,11 +72,13 @@ services:
       - key: CORE_BASE_URL
         value: https://omni-api-staging-cs2w.onrender.com
       - key: AI_MODEL_ALLOWLIST
-        value: gemini-2.0-flash,advisor-stub
+        value: gemini-2.0-flash,advisor-stub,gpt-4o-mini
       - key: GEMINI_API_KEY
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
       - key: LLM_DAILY_SPEND_CAP_USD
         value: "5"
       - key: LLM_MONTHLY_SPEND_CAP_USD
