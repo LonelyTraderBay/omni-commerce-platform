@@ -1,0 +1,55 @@
+name: PR Policy
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    env:
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      PR_BRANCH: ${{ github.head_ref }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Validate branch and pull-request title
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$PR_BRANCH" =~ ^(feat|fix|chore|docs|refactor|test|hotfix|dependabot)/[A-Za-z0-9._/-]+$ ]]; then
+            echo "::error::Branch must use feat/, fix/, chore/, docs/, refactor/, test/, hotfix/, or dependabot/."
+            exit 1
+          fi
+
+          if [[ ! "$PR_TITLE" =~ ^(feat|fix|docs|chore|test|refactor|perf|ci|build|revert)(\([A-Za-z0-9._/-]+\))?!?:\ .+ ]]; then
+            echo "::error::PR title must follow Conventional Commits, for example 'fix(data): prevent duplicate shipment'."
+            exit 1
+          fi
+
+      - name: Validate commit subjects and whitespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+
+          while IFS= read -r subject; do
+            [[ -z "$subject" ]] && continue
+            if [[ ! "$subject" =~ ^(feat|fix|docs|chore|test|refactor|perf|ci|build|revert)(\([A-Za-z0-9._/-]+\))?!?:\ .+ ]]; then
+              echo "::error::Non-conventional commit subject: $subject"
+              failed=1
+            fi
+          done < <(git log --no-merges --format=%s "$BASE_SHA..$HEAD_SHA")
+
+          git diff --check "$BASE_SHA...$HEAD_SHA" || failed=1
+          exit "$failed"
