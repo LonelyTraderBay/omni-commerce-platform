@@ -100,7 +100,7 @@ def test_advise_uses_gemini_when_api_key_set(monkeypatch):
     monkeypatch.setattr(settings, "gemini_api_key", "test-key")
     monkeypatch.setattr(settings, "ai_provider", "gemini")
     monkeypatch.setattr(
-        "app.api.v1.advise.GeminiLlmProvider",
+        "app.api.v1.advise.create_llm_provider",
         lambda *args, **kwargs: FakeGeminiProvider(),
     )
     quota, spend = install_advisor_governance(monkeypatch)
@@ -133,6 +133,47 @@ def test_advise_uses_gemini_when_api_key_set(monkeypatch):
     ]
 
 
+def test_advise_uses_openai_when_provider_is_explicit(monkeypatch):
+    class FakeOpenAiProvider:
+        def complete(self, *, model, messages):
+            assert model == "gpt-4o-mini"
+            assert messages[0]["role"] == "user"
+            return LlmCompletion(
+                text="- Gợi ý từ OpenAI",
+                model="gpt-4o-mini",
+                prompt_tokens=20,
+                completion_tokens=10,
+                total_tokens=30,
+            )
+
+    monkeypatch.setattr(settings, "gemini_api_key", None)
+    monkeypatch.setattr(settings, "openai_api_key", "test-key")
+    monkeypatch.setattr(settings, "openai_model", "gpt-4o-mini")
+    monkeypatch.setattr(settings, "ai_provider", "openai")
+    monkeypatch.setattr(
+        settings,
+        "ai_model_allowlist",
+        "gemini-2.0-flash,advisor-stub,gpt-4o-mini",
+    )
+    monkeypatch.setattr(
+        "app.api.v1.advise.create_llm_provider",
+        lambda *args, **kwargs: FakeOpenAiProvider(),
+    )
+    install_advisor_governance(monkeypatch)
+
+    response = client.post(
+        "/internal/v1/ai/advise",
+        headers={"x-service-key": settings.service_m2m_key},
+        json={"orgId": ORG_ID},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["model"] == "gpt-4o-mini"
+    assert body["toolsUsed"][0]["mode"] == "openai"
+    assert body["suggestionsText"] == "- Gợi ý từ OpenAI"
+
+
 def test_advise_falls_back_to_stub_when_gemini_fails(monkeypatch):
     class FailingGeminiProvider:
         def complete(self, *, model, messages):
@@ -141,7 +182,7 @@ def test_advise_falls_back_to_stub_when_gemini_fails(monkeypatch):
     monkeypatch.setattr(settings, "gemini_api_key", "test-key")
     monkeypatch.setattr(settings, "ai_provider", "gemini")
     monkeypatch.setattr(
-        "app.api.v1.advise.GeminiLlmProvider",
+        "app.api.v1.advise.create_llm_provider",
         lambda *args, **kwargs: FailingGeminiProvider(),
     )
     quota, spend = install_advisor_governance(monkeypatch)
@@ -166,7 +207,7 @@ def test_advise_skips_llm_call_when_spend_cap_is_exceeded(monkeypatch):
     monkeypatch.setattr(settings, "gemini_api_key", "test-key")
     monkeypatch.setattr(settings, "ai_provider", "gemini")
     monkeypatch.setattr(
-        "app.api.v1.advise.GeminiLlmProvider",
+        "app.api.v1.advise.create_llm_provider",
         lambda *args, **kwargs: ForbiddenGeminiProvider(),
     )
     quota, spend = install_advisor_governance(
@@ -196,7 +237,7 @@ def test_advise_skips_llm_call_when_org_token_quota_is_exceeded(monkeypatch):
     monkeypatch.setattr(settings, "gemini_api_key", "test-key")
     monkeypatch.setattr(settings, "ai_provider", "gemini")
     monkeypatch.setattr(
-        "app.api.v1.advise.GeminiLlmProvider",
+        "app.api.v1.advise.create_llm_provider",
         lambda *args, **kwargs: ForbiddenGeminiProvider(),
     )
     quota, spend = install_advisor_governance(
@@ -236,7 +277,7 @@ def test_advise_keeps_completion_when_core_usage_reporting_fails(monkeypatch):
     monkeypatch.setattr(settings, "gemini_api_key", "test-key")
     monkeypatch.setattr(settings, "ai_provider", "gemini")
     monkeypatch.setattr(
-        "app.api.v1.advise.GeminiLlmProvider",
+        "app.api.v1.advise.create_llm_provider",
         lambda *args, **kwargs: FakeGeminiProvider(),
     )
     quota, spend = install_advisor_governance(

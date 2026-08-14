@@ -1,3 +1,5 @@
+import { isUiPreviewEnabled, UI_PREVIEW_ORGANIZATION } from './ui-preview';
+
 export const ACTIVE_ORG_ID_STORAGE_KEY = 'omni.activeOrgId';
 
 let activeOrgId: string | null = null;
@@ -7,7 +9,10 @@ export function getActiveOrgId(): string | null {
     return activeOrgId;
   }
 
-  return window.localStorage.getItem(ACTIVE_ORG_ID_STORAGE_KEY);
+  return (
+    window.localStorage.getItem(ACTIVE_ORG_ID_STORAGE_KEY) ??
+    (isUiPreviewEnabled() ? UI_PREVIEW_ORGANIZATION.id : null)
+  );
 }
 
 export function setActiveOrgId(orgId: string | null): void {

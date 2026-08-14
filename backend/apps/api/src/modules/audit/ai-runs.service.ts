@@ -14,7 +14,7 @@ export const AI_RUNS_SUPABASE = Symbol('AI_RUNS_SUPABASE');
 
 export type SupabaseLike = Pick<SupabaseClient, 'from'>;
 
-const DEFAULT_MODEL_ALLOWLIST = 'gemini-2.0-flash,advisor-stub';
+const DEFAULT_MODEL_ALLOWLIST = 'gemini-2.0-flash,advisor-stub,gpt-4o-mini';
 const AI_RUN_SELECT =
   'id, org_id, conversation_id, message_id, prompt_version, model, input_tokens, output_tokens, tools_json, citations_json, status, created_at';
 

@@ -7,7 +7,7 @@ class Settings(BaseSettings):
 
     service_m2m_key: str = "dev-m2m-key-change-me"
     core_base_url: str = "http://127.0.0.1:4701"
-    ai_model_allowlist: str = "gemini-2.0-flash,advisor-stub"
+    ai_model_allowlist: str = "gemini-2.0-flash,advisor-stub,gpt-4o-mini"
     # ``auto`` selects the deterministic local provider for local/dev/test and
     # the configured remote provider for staging/production. Set ``gemini`` or
     # ``openai`` explicitly only when an external provider is intentional.

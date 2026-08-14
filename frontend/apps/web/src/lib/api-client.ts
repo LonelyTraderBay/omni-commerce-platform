@@ -4,6 +4,8 @@ import {
   type OrganizationRole,
   type StoredOrganization,
 } from './auth-session';
+import { isUiPreviewEnabled } from './ui-preview';
+import { previewApiFetch, previewRawApiFetch } from './ui-preview-api';
 
 export type ChannelConnection = {
   id: string;
@@ -571,6 +573,10 @@ export async function apiFetch<T>(
     accessToken?: string;
   } = {},
 ): Promise<T> {
+  if (isUiPreviewEnabled()) {
+    return previewApiFetch<T>(path, init);
+  }
+
   const accessToken = options.accessToken ?? getAccessToken();
   if (!accessToken) {
     throw new ApiClientError('missing_auth', 'Thiếu phiên đăng nhập.');
@@ -1476,6 +1482,10 @@ async function rawApiFetch(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
+  if (isUiPreviewEnabled()) {
+    return previewRawApiFetch();
+  }
+
   const accessToken = getAccessToken();
   const orgId = getActiveOrgId();
   if (!accessToken || !orgId) {

@@ -50,6 +50,19 @@ Then start the complete local stack:
 pnpm run dev:local:fresh
 ```
 
+### Xem UI không cần tài khoản
+
+Nếu chỉ cần xem giao diện, chạy riêng web app:
+
+```powershell
+pnpm run dev:ui
+```
+
+Lệnh này chạy web app ở `http://127.0.0.1:4700` với tổ chức và dữ liệu demo,
+không cần đăng ký, đăng nhập, API hay Supabase. Chế độ này chỉ có hiệu lực ở
+development/localhost; staging và production vẫn dùng auth thật. Luồng auth
+local bình thường vẫn dùng `pnpm --filter @omni/web dev`.
+
 Stop Web, API, AI, Inngest and local Supabase together:
 
 ```powershell

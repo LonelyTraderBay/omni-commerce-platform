@@ -12,6 +12,7 @@
     "test:e2e:local": "node infra/scripts/local-e2e-smoke.mjs",
     "ports:sync": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/sync-local-env-ports.ps1",
     "dev": "turbo run dev --parallel",
+    "dev:ui": "node infra/scripts/dev-ui-preview.mjs",
     "dev:local": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/dev-local.ps1",
     "dev:local:fresh": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/dev-local.ps1 -FreshWeb",
     "dev:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/dev-local.ps1 -Stop"

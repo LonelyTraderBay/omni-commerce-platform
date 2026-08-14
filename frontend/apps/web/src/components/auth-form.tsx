@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { type CSSProperties, type FormEvent, useState } from 'react';
+import { type CSSProperties, type FormEvent, useEffect, useState } from 'react';
 
 import {
   ApiClientError,
@@ -20,16 +20,42 @@ type AuthFormProps = {
   mode: AuthMode;
 };
 
+const DEMO_EMAIL = 'demo@omni.local';
+const DEMO_PASSWORD = 'OmniDemo123!';
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showDemoAccount, setShowDemoAccount] = useState(false);
   const [orgName, setOrgName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const isSignup = mode === 'signup';
+
+  useEffect(() => {
+    const isLocalDevelopment =
+      process.env.NODE_ENV === 'development' &&
+      ['localhost', '127.0.0.1', '::1', '[::1]'].includes(
+        window.location.hostname,
+      );
+
+    setShowDemoAccount(!isSignup && isLocalDevelopment);
+
+    if (!isSignup && isLocalDevelopment) {
+      setEmail(DEMO_EMAIL);
+      setPassword(DEMO_PASSWORD);
+    }
+  }, [isSignup]);
+
+  function fillDemoAccount() {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
+    setError(null);
+    setNotice(null);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -185,6 +211,21 @@ export function AuthForm({ mode }: AuthFormProps) {
             />
           </label>
 
+          {showDemoAccount ? (
+            <aside role="note" style={demoAccountStyle}>
+              <strong>Tài khoản demo local</strong>
+              <span>Email: {DEMO_EMAIL}</span>
+              <span>Mật khẩu: {DEMO_PASSWORD}</span>
+              <button
+                type="button"
+                onClick={fillDemoAccount}
+                style={demoButtonStyle}
+              >
+                Điền lại tài khoản demo
+              </button>
+            </aside>
+          ) : null}
+
           {isSignup ? (
             <fieldset
               style={{
@@ -289,4 +330,29 @@ const inputStyle: CSSProperties = {
   color: '#0f172a',
   font: 'inherit',
   padding: '11px 12px',
+};
+
+const demoAccountStyle: CSSProperties = {
+  background: '#eff6ff',
+  border: '1px solid #bfdbfe',
+  borderRadius: 10,
+  color: '#1e3a8a',
+  display: 'flex',
+  flexDirection: 'column',
+  fontSize: 14,
+  gap: 5,
+  marginTop: 18,
+  padding: 12,
+};
+
+const demoButtonStyle: CSSProperties = {
+  alignSelf: 'flex-start',
+  background: 'transparent',
+  border: 'none',
+  color: '#1d4ed8',
+  cursor: 'pointer',
+  font: 'inherit',
+  fontWeight: 800,
+  padding: '4px 0 0',
+  textDecoration: 'underline',
 };
