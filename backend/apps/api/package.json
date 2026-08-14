@@ -14,7 +14,7 @@
   "dependencies": {
     "@nestjs/common": "^11.1.28",
     "@nestjs/core": "^11.1.28",
-    "@nestjs/platform-express": "^11.1.28",
+    "@nestjs/platform-express": "^11.1.29",
     "@omni/authz-types": "workspace:*",
     "@sentry/node": "^10.68.0",
     "@supabase/supabase-js": "^2.112.2",
