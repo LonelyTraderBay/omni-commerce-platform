@@ -18,7 +18,7 @@
     "dev:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/dev-local.ps1 -Stop"
   },
   "devDependencies": {
-    "turbo": "^2.10.9",
+    "turbo": "^2.10.11",
     "typescript": "7.0.2",
     "prettier": "^3.4.2"
   },
